@@ -6,12 +6,12 @@
                     <template v-for="item in mon">
                         <div class="col" :key="item.key">
                             <div class="card shadow-sm h-100">
-                                <img src="../assets/img/tacos.jpg" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="">
+                                <img :src="filename(item.id)" @error="onImgError" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="">
                                 <div class=" card-body mb-5">
                                     <h2 style="text-align: center; font-weight: bolder; color: rgb(49, 2, 6);">{{ item.name }}</h2>
-                                    <p class="card-text">{{ item.description.substring(0,50)+'...' }}</p>
+                                    <p class="card-text" :title="item.description">{{ item.description }}</p>
                                     <div class="d-flex position-absolute bottom-0 w-100 justify-content-between align-items-center" style="left: 0; padding: 20px;">
-                                        <small class="price">${{ item.price }}</small>
+                                        <small class="price">{{ item.price }} VNĐ</small>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-sm btn-outline-primary btn-chonmon" @click="addOrder(item.id, item.name, item.price)">Thêm</button>
                                         </div>
@@ -56,12 +56,12 @@
                         <tfoot v-if="orders.length != 0">
                             <tr>
                                 <th colspan="3">Thành tiền</th>
-                                <th>${{ cost }}</th>
+                                <th>{{ cost }} VNĐ</th>
                             </tr>
                         </tfoot>
                     </table>
                     <div class="w-100">
-                        <button type="button" class="float-end btn btn-lg btn-outline-success" style="font-size: 1.3em;" @click="order()">Đặt món</button>
+                        <button type="button" class="float-end btn btn-lg btn-outline-success" style="font-size: 1.3em;" @click="order()" v-if="orders.length != 0">Đặt món</button>
                     </div>
                 </div>
             </div>
@@ -83,6 +83,7 @@
             orders: {
                 deep: true,
                 handler() {
+                    this.cost = 0;
                     this.orders.forEach(order => {
                         this.cost += order.price * order.quantity;
                     });
@@ -94,6 +95,15 @@
                 APIService.getMon().then((result) => {
                     this.$data.mon = result.data;
                 });
+            },
+            filename(id) {
+                return 'http://res.khodata.xyz/imgs/'+id+'.jpg';
+            },
+            onHoverItem(description) {
+                event.target.innerHTML = description;
+            },
+            onImgError(event) {
+                event.target.src = "https://cdn-prod.medicalnewstoday.com/content/images/articles/325/325521/illustration-of-different-plates-of-food.jpg";
             },
             addOrder(id, name, price) {
                 let found = false;
@@ -114,25 +124,29 @@
                 let i = 1;
                 let orders = this.$data.orders;
                 let count = orders.length;
-                this.orders.forEach((order) => {
-                    let tableCode = this.$route.params.code;
-                    let data = {
-                        dish_id: order.id,
-                        quantity: order.quantity,
-                        price: order.price
-                    };
-                    APIService.order(tableCode, data).then(function (result) {
-                        if (i == count) {
-                            if (result.code == null || result.code == 0) {
-                                alert('Đặt món thất bại!');
-                            } else {
-                                alert('Đặt món thành công!');
-                                orders.splice(0);
+                if (count > 0) {
+                    this.orders.forEach((order) => {
+                        let tableCode = this.$route.params.code;
+                        let data = {
+                            dish_id: order.id,
+                            quantity: order.quantity,
+                            price: order.price
+                        };
+                        APIService.order(tableCode, data).then(function (result) {
+                            if (i == count) {
+                                if (result.code == null || result.code == 0) {
+                                    alert('Đặt món thất bại!');
+                                } else {
+                                    alert('Đặt món thành công!');
+                                    orders.splice(0);
+                                }
                             }
-                        }
-                        i++;
+                            i++;
+                        });
                     });
-                });
+                } else {
+                    alert('Vui lòng chọn ít nhất một món!');
+                }
             },
             deleteOrder(index) {
                 let conf = confirm('Bạn có muốn xóa món này ra khỏi giỏ hàng?');

@@ -4,7 +4,7 @@
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                     <h1 style="text-align: center;"></h1>
-                    <h1 style="text-align: center; color: rgb(49, 2, 6); font-weight: bold; margin-top: 1.5em;">Giỏ hàng</h1>
+                    <h1 style="text-align: center; color: rgb(49, 2, 6); font-weight: bold; margin-top: 1.5em;">Hóa đơn</h1>
                     <table class="table" style="font-size: 1.5em;">
                         <thead class="thead-dark" style="background-color: rgb(10, 112, 112); color: white;">
                             <tr>
@@ -22,14 +22,14 @@
                                     <td class="cart-quantity cart-column">
                                         <input class="cart-quantity-input form-control" type="number" v-model="item.quantity" readonly>
                                     </td>
-                                    <td>${{ item.price }}</td>
+                                    <td>{{ item.price }} VNĐ</td>
                                 </tr>
                             </template>
                         </tbody>
-                        <tfoot>
+                        <tfoot v-if="orders.length > 0">
                             <tr>
                                 <th colspan="3">Thành tiền</th>
-                                <th>${{ cost }}</th>
+                                <th>{{ cost }} VNĐ</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -50,6 +50,7 @@
         },
         watch: {
             orders() {
+                this.cost = 0;
                 this.orders.forEach(order => {
                     this.cost += order.price * order.quantity;
                 });

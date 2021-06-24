@@ -1,7 +1,6 @@
 <template>
     <div class="home-container">
         <p class="fw-light" style="font-size: 4em; margin-top: 0.8em;">ABC RESTAURANT</p>
-
         <h3>Scan QR CODE</h3>
         <div class="qrcode-container">
             <img class="qrcode" src="../assets/img/scanqrcode.png" style="width: 200px;" alt="QRCode">
@@ -15,7 +14,6 @@
         </div>
     </div>
 </template>
-
 <script>
     import APIService from '../api-service';
 
@@ -24,33 +22,38 @@
         data() {
             return {
                 result: null,
-                code: 'UKAFdxvm9U'
+                code: ''
             }
         },
         methods: {
             chonBan() {
-                let data = {
-                    code: this.code
-                }
-                APIService.chonBan(data).then((result) => {
-                    if (result.code != null && result.code == 1) {
-                        alert('Chọn bàn thành công!');
-                        this.$router.push('chon-mon/'+this.$data.code);
-                    } else {
-                        alert('Chọn bàn thất bại! Mã bàn không tồn tại hoặc bàn đã có người ngồi!');
+                if (this.code != '') {
+                    let data = {
+                        code: this.code
                     }
-                });
+
+                    APIService.chonBan(data).then((result) => {
+                        if (result.code != null && result.code == 1) {
+                            alert('Chọn bàn thành công!');
+                            this.$router.push('chon-mon/' + this.$data.code);
+                        } else {
+                            alert('Chọn bàn thất bại! Mã bàn không tồn tại hoặc bàn đã có người ngồi!');
+                        }
+                    });
+                } else {
+                    alert('Vui lòng không để trống mã bàn!');
+                }
             }
         },
     }
 </script>
-
 <style>
     .home-container {
         text-align: center;
         padding-top: 0.8em;
         height: 100vh;
     }
+
     .table-code {
         padding: .375rem .75rem;
         font-size: 1rem;
@@ -64,8 +67,9 @@
         -moz-appearance: none;
         appearance: none;
         border-radius: .25rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     }
+
     .fw-light {
         color: rgb(10, 112, 112);
         font-size: 4em;
